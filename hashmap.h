@@ -85,7 +85,33 @@
         hashmap->len++;\
         return true;\
     }\
+    bool concat(prefix, _remove) (HashMapT* hashmap, K key) {\
+        if(!hashmap->buckets.len) return false;\
+        size_t hash = hash_key(key);\
+        concat(Bucket_, HashMapT)* bucket = &hashmap->buckets.items[hash % hashmap->buckets.len];\
+        concat(Pair_, HashMapT)* pair = bucket->first;\
+        /* Some dark magic:*/\
+        /* Basically because the `next` field will always be at offset 0 it means that we can just take a pointer to the bucket itself*/\
+        /* Which simplifies a hell of a lot of stuff*/\
+        concat(Pair_, HashMapT)* prev = NULL;\
+        while(pair) {\
+            if(key_eq(pair->key,key)) {\
+                if(prev == NULL) {\
+                    bucket->first = pair->next;\
+                } else {\
+                    prev->next = pair->next;\
+                }\
+                pair_dealloc(pair, sizeof(*pair));\
+                hashmap->len--;\
+                return true;\
+            }\
+            prev = pair;\
+            pair = pair->next;\
+        }\
+        return false;\
+    }\
     T* concat(prefix, _get) (HashMapT* hashmap, K key) {\
+        if(!hashmap->buckets.len) return NULL;\
         size_t hash = hash_key(key);\
         concat(Bucket_, HashMapT)* bucket = &hashmap->buckets.items[hash % hashmap->buckets.len];\
         concat(Pair_, HashMapT)* pair = bucket->first;\
